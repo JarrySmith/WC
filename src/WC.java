@@ -11,27 +11,28 @@ import java.nio.charset.Charset;
  */
 public class WC {
 
-    public static String save_path="result.txt";
-    public static String stop_path="stop.txt";
-    public static  StringBuilder string_args=new StringBuilder();
-    public static  String param="-a";
-    public static String filetype=null;
+    public static String save_path = "result.txt";
+    public static String stop_path = "stop.txt";
+    public static StringBuilder string_args = new StringBuilder();
+    public static String param = "-a";
+    public static String filetype = null;
     public static boolean err = false;
-    public static int countchars(String filename){
+
+    public static int countchars(String filename) {
         String text = readToString(filename);
-        char[]ch = text.toCharArray();
-        int decrese=0;
-        for(int i=0;i<ch.length;i++)
-        {
-            if (ch[i]=='\n'||ch[i]=='\r') decrese++;
+        char[] ch = text.toCharArray();
+        int decrese = 0;
+        for (int i = 0; i < ch.length; i++) {
+            if (ch[i] == '\n' || ch[i] == '\r') decrese++;
         }
 
-        return ch.length-decrese;
+        return ch.length - decrese;
     }
-    public static int countlines(String fileName){
+
+    public static int countlines(String fileName) {
         File file = new File(fileName);
         BufferedReader reader = null;
-        int line=0;
+        int line = 0;
         try {
             reader = new BufferedReader(new FileReader(file));
             String tempString = null;
@@ -51,8 +52,9 @@ public class WC {
                 }
             }
         }
-    return line-1;
+        return line - 1;
     }
+
     public static void readFileByLines(String fileName) {
 
         File file = new File(fileName);
@@ -78,6 +80,7 @@ public class WC {
             }
         }
     }
+
     public static String readToString(String fileName) {
         String encoding = "UTF-8";
         File file = new File(fileName);
@@ -100,103 +103,108 @@ public class WC {
             return null;
         }
     }
-    public static int count_word (String fileName)
-    {
-       String[]replace_part={" ",",","\t"};
-       String text=null;
-       text = readToString(fileName);
-       text = text.replaceAll("\r\n", ".");
-       for(int i=0;i<replace_part.length;i++)
-       {
-           try {
-               text =text.replaceAll(replace_part[i],".");
-           }
-          catch (NullPointerException e){
-              System.out.println(e);
-          }
-       }
-        System.out.println(text);
-       String[]t=text.split("\\.");
-       int de=0;
-       String []stopword = null;
-       if(param.contains("-e"))stopword= get_stopword(stop_path);
-       if(null==stopword){
-       for(int i=0;i<t.length;i++)
-       {if(t[i].equals("")) de++;}
-       }
-       else {
-           for(int i=0;i<t.length;i++)
-           {
-               if(t[i].equals("")){de++;continue;}
-               for(int j=0;j<stopword.length;j++)
-               {
-                   if (t[i].equals(stopword[j]))de++;
-               }
-             }
-       }
-       return t.length-de ;
+
+    public static int count_word(String fileName) {
+        String[] replace_part = {" ", ",", "\t"};
+        String text = null;
+        text = readToString(fileName);
+        text = text.replaceAll("\r\n", ".");
+        for (int i = 0; i < replace_part.length; i++) {
+            try {
+                text = text.replaceAll(replace_part[i], ".");
+            } catch (NullPointerException e) {
+                System.out.println(e);
+            }
+        }
+//        System.out.println(text);
+        String[] t = text.split("\\.");
+        int de = 0;
+        String[] stopword = null;
+        if (param.contains("-e")) stopword = get_stopword(stop_path);
+        if (null == stopword) {
+            for (int i = 0; i < t.length; i++) {
+                if (t[i].equals("")) de++;
+            }
+        } else {
+            for (int i = 0; i < t.length; i++) {
+                if (t[i].equals("")) {
+                    de++;
+                    continue;
+                }
+                for (int j = 0; j < stopword.length; j++) {
+                    if (t[i].equals(stopword[j])) de++;
+                }
+            }
+        }
+        return t.length - de;
 
     }
-    public static boolean is_emptyline(String text)
-    {
-        char[]ch = text.toCharArray();
+
+    public static boolean is_emptyline(String text) {
+        char[] ch = text.toCharArray();
         boolean flag = false;
-        int chars=0;
-        for(int i=0;i<ch.length;i++){
-                if(ch[i]==' '|| ch[i]=='\t'||ch[i]=='\n'||ch[i]=='\r') continue;
-                else chars++;
+        int chars = 0;
+        for (int i = 0; i < ch.length; i++) {
+            if (ch[i] == ' ' || ch[i] == '\t' || ch[i] == '\n' || ch[i] == '\r') continue;
+            else chars++;
         }
-        if(chars<=1)flag=true;
+        if (chars <= 1) flag = true;
         return flag;
     }
-    public static boolean is_expline(String text){
-        char[]ch = text.toCharArray();
-        int word =0;
-        boolean flag=false;
-        for(int i=0;i<ch.length;i++)
-        {
-            if (ch[i]=='/'&& ch[i+1]=='/'&& i+1<=ch.length-1){
-                if(word<=1) {
+
+    public static boolean is_expline(String text) {
+        char[] ch = text.toCharArray();
+        int word = 0;
+        boolean flag = false;
+        for (int i = 0; i < ch.length; i++) {
+            if (ch[i] == '/' && ch[i + 1] == '/' && i + 1 <= ch.length - 1) {
+                if (word <= 1) {
                     flag = true;
                     break;
                 }
-            }
-                else    word++;
+            } else word++;
         }
         return flag;
     }
-    public static int[] countdetail(String fileName) throws IOException{
-        File file=new File(fileName);
+
+    public static int[] countdetail(String fileName) throws IOException {
+        File file = new File(fileName);
 
         if (!file.exists() || file.isDirectory())
-        throw new FileNotFoundException();
-        int emptyline=0;
-        int codeline=0;
-        int expline=0;
-        boolean multiexp =false;
+            throw new FileNotFoundException();
+        int emptyline = 0;
+        int codeline = 0;
+        int expline = 0;
+        boolean multiexp = false;
         CharSequence exp_start = "/**";
         CharSequence exp_end = "*/";
-        BufferedReader br=new BufferedReader(new FileReader(file));
-        String temp=null;
-        StringBuffer sb=new StringBuffer();
-        temp=br.readLine();
-        while(temp!=null){
-            if(multiexp) expline++;
-            if(temp.contains(exp_start))multiexp=true;
-            if(temp.contains(exp_end)){expline++;multiexp=false;temp=br.readLine();continue;}
-            if(!multiexp)
-            {
-                if(is_expline(temp))expline++;
-                else if(is_emptyline(temp))emptyline++;
-                else codeline++;}
+        BufferedReader br = new BufferedReader(new FileReader(file));
+        String temp = null;
+        StringBuffer sb = new StringBuffer();
+        temp = br.readLine();
+        while (temp != null) {
+            if (multiexp) expline++;
+            if (temp.contains(exp_start)) multiexp = true;
+            if (temp.contains(exp_end)) {
+                expline++;
+                multiexp = false;
+                temp = br.readLine();
+                continue;
+            }
+            if (!multiexp) {
+                if (is_expline(temp)) expline++;
+                else if (is_emptyline(temp)) emptyline++;
+                else codeline++;
+            }
 
-            temp=br.readLine();
+            temp = br.readLine();
         }
-        int[]result={codeline,emptyline,expline};
-    return result ;
+        int[] result = {codeline, emptyline, expline};
+        return result;
     }
-    public static void traverseFolder2(String path){
-        int count=0;
+
+    public static void traverseFolder2(String path) {
+
         File file = new File(path);
         if (file.exists()) {
             File[] files = file.listFiles();
@@ -212,27 +220,23 @@ public class WC {
                         String filename = file2.getName();
 
 
-                        if(filename.endsWith(filetype)){
-                            count++;
-                            System.out.println(count);
-                            String filepath = path + '\\'+filename;
-//                            System.out.println("文件路径:" + filepath);
-                            //如果有.c文件
-                            int words=0;
-                            int lines=0;
-                            int chars=0;
-                            int []detail = new int[3];
+                        if (filename.endsWith(filetype)) {
+
+                            String filepath = path + '\\' + filename;
+                            int words = 0;
+                            int lines = 0;
+                            int chars = 0;
+                            int[] detail = new int[3];
                             try {
-                                if(null==param) break;
-                                if(param.contains("-a")) detail = countdetail(filepath);
-                                if(param.contains("-w")) words=count_word(filepath);
-                                if(param.contains("-c")) chars=countchars(filepath);
-                                if(param.contains("-l")) lines= countlines(filepath);
-                                 saveresult(words,lines,chars,detail,filename);
-                            }
-                        catch (IOException e){
+                                if (null == param) break;
+                                if (param.contains("-a")) detail = countdetail(filepath);
+                                if (param.contains("-w")) words = count_word(filepath);
+                                if (param.contains("-c")) chars = countchars(filepath);
+                                if (param.contains("-l")) lines = countlines(filepath);
+                                saveresult(words, lines, chars, detail, filename);
+                            } catch (IOException e) {
                                 e.printStackTrace();
-                        }
+                            }
                         }
 //                        System.out.println("文件:" + file2.getName());
 
@@ -241,68 +245,73 @@ public class WC {
             }
         }
     }
-    public static void WC(String []args){
-        int words=0;
-        int lines=0;
-        int chars=0;
-        int[]detail = new int[3];
 
-        CharSequence save=".txt";
-        String filepath=null;
+    public static void WC(String[] args) {
+        int words = 0;
+        int lines = 0;
+        int chars = 0;
+        int[] detail = new int[3];
 
-        boolean checked_filetype = false;
-        for (int i=0;i<args.length;i++)
-        {
-           if(!checked_filetype&&args[i].contains(".")) {filepath =args[i];checked_filetype=true;continue;}
-           if(args[i].contains(".txt")) continue;
+        CharSequence save = ".txt";
+        String filepath = null;
 
-           //停用词的文件判断
-            if(args[i].equals("-e")){
-                if(i==args.length-1){ System.out.println("没有指定停用词文本");err=true;}
-                else if (!(args[i+1].contains(save))) System.out.println("停用词文本需紧跟在-e后");
-                else stop_path=args[i+1];
+        boolean checked_file = false;
+        for (int i = 0; i < args.length; i++) {
+            if (args[i].contains(".txt")) continue;
+            //停用词的文件判断
+            if (args[i].equals("-e")) {
+                if (i == args.length - 1) {
+                    System.out.println("没有指定停用词文本");
+                    err = true;
+                } else if (!(args[i + 1].contains(save))) System.out.println("停用词文本需紧跟在-e后");
+                else stop_path = args[i + 1];
             }
-
-           if(args[i].equals("-o")){
-               if(i==args.length-1) {System.out.println("没有指定输出结果文本");err=true;}
-               else if (!(args[i+1].contains(save))) System.out.println("result.txt需紧跟在-o后");
-               else save_path=args[i+1];
-           }
-           string_args.append(args[i]);
+            if (args[i].equals("-o")) {
+                if (i == args.length - 1) {
+                    System.out.println("没有指定输出结果文本");
+                    err = true;
+                } else if (!(args[i + 1].contains(save))) System.out.println("result.txt需紧跟在-o后");
+                else save_path = args[i + 1];
+            }
+            string_args.append(args[i]);
         }
         param = string_args.toString();
-        for (int i=args.length-1;i>0;i--)
-        {
-            if(args[i].contains("*."))
-            {
+        if (!err) {
+            if (param.contains("-s")) {
+                for (int i = args.length - 1; i > 0; i--) {
+                    if (args[i].contains("*.")) {
 
-                if (param.contains("-s"))filetype= "."+args[i].split("\\.")[1];
-                else {
-                   err=true;
-                    System.out.println("只有输入-s才能进行全目录遍历规定文件");
-                }break;
-            }
-        }
-//        System.out.println(param);
-        if(!err){
-        for (int i=0;i<args.length;i++)
-        {
-            if(args[i].equals("-s")) {String path =  System.getProperty("user.dir");traverseFolder2(path);break;}
-           if(null!=filepath)
-           { if(args[i].equals("-c")) chars=countchars(filepath);
-               if(args[i].equals("-l")) lines=countlines(filepath);
-               if(args[i].equals("-w")) words=count_word(filepath);
+                        filetype = "." + args[i].split("\\.")[1];
+
+                    }
+                }
+                String path =  System.getProperty("user.dir");
+                traverseFolder2(path);
+            } else {
+                for (int i = 0; i < args.length; i++) {
+                    if (args[i].contains("*.")){err=true;System.out.println("只有输入-s才能进行全目录遍历规定文件");}
+                    if (args[i].contains(".")) {
+                        filepath = args[i];
+                        break;
+                    }
+                }
+            if(!err)
+            {
+            if (param.contains("-c")) chars = countchars(filepath);
+            if (param.contains("-l")) lines = countlines(filepath);
+            if (param.contains("-w")) words = count_word(filepath);
             try {
-                if(args[i].equals("-a")) detail=countdetail(filepath);
-          }
-            catch (IOException e){
-              e.printStackTrace();
+                if (param.contains("-a")) detail = countdetail(filepath);
+            } catch (IOException e) {
+                e.printStackTrace();
             }
             }
-        }
-        saveresult(words,lines,chars,detail,filepath);
         }
     }
+
+        saveresult(words,lines,chars,detail,filepath);
+        }
+
     public static String[] get_stopword(String fileName){
         String text=null;
         text = readToString(fileName);
@@ -335,8 +344,8 @@ public class WC {
     }
     public static void  main(String[]args)
     {
-
-        if(args.length==0)System.out.println("no args");
+//        String []a = {"-a","-w","-l","-c","a.c","-o","a.txt"};
+//        if(args.length==0)System.out.println("no args");
         String path = System.getProperty("user.dir");
         WC(args);
     }
