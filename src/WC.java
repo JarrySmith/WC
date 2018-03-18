@@ -15,6 +15,7 @@ public class WC {
     public static String stop_path="stop.txt";
     public static  StringBuilder string_args=new StringBuilder();
     public static  String param="-a";
+    public static String filetype=null;
     public static boolean err = false;
     public static int countchars(String filename){
         String text = readToString(filename);
@@ -211,7 +212,7 @@ public class WC {
                         String filename = file2.getName();
 
 
-                        if(filename.endsWith(".c")){
+                        if(filename.endsWith(filetype)){
                             count++;
                             System.out.println(count);
                             String filepath = path + '\\'+filename;
@@ -249,11 +250,12 @@ public class WC {
         CharSequence save=".txt";
         String filepath=null;
 
-
+        boolean checked_filetype = false;
         for (int i=0;i<args.length;i++)
         {
-           if(args[i].endsWith(".c")) {filepath =args[i];continue;}
+           if(!checked_filetype&&args[i].contains(".")) {filepath =args[i];checked_filetype=true;continue;}
            if(args[i].contains(".txt")) continue;
+
            //停用词的文件判断
             if(args[i].equals("-e")){
                 if(i==args.length-1){ System.out.println("没有指定停用词文本");err=true;}
@@ -269,6 +271,18 @@ public class WC {
            string_args.append(args[i]);
         }
         param = string_args.toString();
+        for (int i=args.length-1;i>0;i--)
+        {
+            if(args[i].contains("*."))
+            {
+
+                if (param.contains("-s"))filetype= "."+args[i].split("\\.")[1];
+                else {
+                   err=true;
+                    System.out.println("只有输入-s才能进行全目录遍历规定文件");
+                }break;
+            }
+        }
 //        System.out.println(param);
         if(!err){
         for (int i=0;i<args.length;i++)
@@ -321,9 +335,9 @@ public class WC {
     }
     public static void  main(String[]args)
     {
+
         if(args.length==0)System.out.println("no args");
         String path = System.getProperty("user.dir");
-
         WC(args);
     }
 
