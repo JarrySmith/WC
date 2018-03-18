@@ -55,32 +55,6 @@ public class WC {
         return line - 1;
     }
 
-    public static void readFileByLines(String fileName) {
-
-        File file = new File(fileName);
-        BufferedReader reader = null;
-        try {
-            reader = new BufferedReader(new FileReader(file));
-            String tempString = null;
-            int line = 1;
-            // 一次读入一行，直到读入null为文件结束
-            while ((tempString = reader.readLine()) != null) {
-                // 显示行号
-                line++;
-            }
-            reader.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        } finally {
-            if (reader != null) {
-                try {
-                    reader.close();
-                } catch (IOException e1) {
-                }
-            }
-        }
-    }
-
     public static String readToString(String fileName) {
         String encoding = "UTF-8";
         File file = new File(fileName);
@@ -156,13 +130,22 @@ public class WC {
         char[] ch = text.toCharArray();
         int word = 0;
         boolean flag = false;
+//        System.out.println(ch);
         for (int i = 0; i < ch.length; i++) {
+            if(i<ch.length-1){
             if (ch[i] == '/' && ch[i + 1] == '/' && i + 1 <= ch.length - 1) {
                 if (word <= 1) {
                     flag = true;
                     break;
+                }}
+              else  if (ch[i] == '/' && ch[i + 1] == '*' && i + 1 <= ch.length - 1) {
+                    if (word <= 1) {
+                        flag = true;
+                        break;
+                    }
                 }
-            } else word++;
+             else if(ch[i] == ' ' || ch[i] == '\t' )continue;else word++;}
+             else if(!(ch[i] == ' ') && !(ch[i] == '\t') ) word++;
         }
         return flag;
     }
@@ -176,21 +159,26 @@ public class WC {
         int codeline = 0;
         int expline = 0;
         boolean multiexp = false;
-        CharSequence exp_start = "/**";
+        CharSequence exp_start = "/*";
         CharSequence exp_end = "*/";
         BufferedReader br = new BufferedReader(new FileReader(file));
         String temp = null;
         StringBuffer sb = new StringBuffer();
         temp = br.readLine();
         while (temp != null) {
-            if (multiexp) expline++;
-            if (temp.contains(exp_start)) multiexp = true;
-            if (temp.contains(exp_end)) {
-                expline++;
+            //多行注释
+            if (temp.contains(exp_start)&&temp.contains(exp_end)) {expline++ ;temp=br.readLine();continue;}
+            if(temp.contains(exp_start)&&!temp.contains(exp_end)) {multiexp=true;expline++;}
+            if (multiexp&&!temp.contains("/*")&&!temp.contains("*/")) expline++;
+            if (temp.contains(exp_end)&&multiexp) {
+                if (temp.charAt(temp.length()-1)=='/')
+                {  expline++;
                 multiexp = false;
                 temp = br.readLine();
-                continue;
+                continue;}
+                else multiexp=false;
             }
+            //单行注释
             if (!multiexp) {
                 if (is_expline(temp)) expline++;
                 else if (is_emptyline(temp)) emptyline++;
@@ -203,30 +191,27 @@ public class WC {
         return result;
     }
 
-    public static void traverseFolder2(String path) {
-
+    public static void traversepath(String path) {
         File file = new File(path);
         if (file.exists()) {
             File[] files = file.listFiles();
+            //如果是个空文件夹
             if (files.length == 0) {
-//                System.out.println("文件夹是空的!");
                 return;
             } else {
                 for (File file2 : files) {
                     if (file2.isDirectory()) {
-//                        System.out.println("文件夹:" + file2.getAbsolutePath());
-                        traverseFolder2(file2.getAbsolutePath());
+                        //遍历子目录
+                        traversepath(file2.getAbsolutePath());
                     } else {
                         String filename = file2.getName();
-
-
                         if (filename.endsWith(filetype)) {
-
                             String filepath = path + '\\' + filename;
                             int words = 0;
                             int lines = 0;
                             int chars = 0;
                             int[] detail = new int[3];
+                            //根据参数进行统计
                             try {
                                 if (null == param) break;
                                 if (param.contains("-a")) detail = countdetail(filepath);
@@ -238,8 +223,6 @@ public class WC {
                                 e.printStackTrace();
                             }
                         }
-//                        System.out.println("文件:" + file2.getName());
-
                     }
                 }
             }
@@ -266,6 +249,7 @@ public class WC {
                 } else if (!(args[i + 1].contains(save))) System.out.println("停用词文本需紧跟在-e后");
                 else stop_path = args[i + 1];
             }
+            //判断是否函数输出文本
             if (args[i].equals("-o")) {
                 if (i == args.length - 1) {
                     System.out.println("没有指定输出结果文本");
@@ -278,16 +262,19 @@ public class WC {
         param = string_args.toString();
         if (!err) {
             if (param.contains("-s")) {
+                //默认path为当前目录
+                String path =  System.getProperty("user.dir");
                 for (int i = args.length - 1; i > 0; i--) {
                     if (args[i].contains("*.")) {
-
+                        //获取指定文件类型和指定目录
+                        if(args[i].length()>15) path= args[i].split("\\.")[0].replace("*","");
                         filetype = "." + args[i].split("\\.")[1];
-
                     }
                 }
-                String path =  System.getProperty("user.dir");
-                traverseFolder2(path);
+                //开始遍历目录
+                traversepath(path);
             } else {
+                //错误判断
                 for (int i = 0; i < args.length; i++) {
                     if (args[i].contains("*.")){err=true;System.out.println("只有输入-s才能进行全目录遍历规定文件");}
                     if (args[i].contains(".")) {
@@ -297,6 +284,7 @@ public class WC {
                 }
             if(!err)
             {
+                //及非遍历统计
             if (param.contains("-c")) chars = countchars(filepath);
             if (param.contains("-l")) lines = countlines(filepath);
             if (param.contains("-w")) words = count_word(filepath);
@@ -308,7 +296,6 @@ public class WC {
             }
         }
     }
-
         saveresult(words,lines,chars,detail,filepath);
         }
 
@@ -344,7 +331,8 @@ public class WC {
     }
     public static void  main(String[]args)
     {
-//        String []a = {"-a","-w","-l","-c","a.c","-o","a.txt"};
+//        String []a = {"-a","a.c","-o","a.txt"};
+//        WC(a);
 //        if(args.length==0)System.out.println("no args");
         String path = System.getProperty("user.dir");
         WC(args);
