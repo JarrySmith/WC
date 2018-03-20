@@ -12,7 +12,7 @@ import java.nio.charset.Charset;
 public class WC {
 
     public static String save_path = "result.txt";
-    public static String stop_path = "stop.txt";
+    public static String stop_path = "stoplist.txt";
     public static StringBuilder string_args = new StringBuilder();
     public static String param = "-a";
     public static String filetype = null;
